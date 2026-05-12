@@ -324,6 +324,7 @@ function playTimeUpSound() {
 function render() {
   const isFinished = !state.isRunning && state.remainingSeconds === 0 && state.problems.length > 0;
   const formattedTime = formatTime(state.remainingSeconds);
+  const timerLabel = formatTimeLeft(state.remainingSeconds);
   const sessionLabel = getSessionLabel();
   const showComposer = !state.isRunning && (state.problems.length === 0 || state.isEditing);
   const problemsSignature = getProblemsRenderSignature();
@@ -332,7 +333,7 @@ function render() {
   elements.editSessionButton.classList.toggle("hidden", state.problems.length === 0 || state.isEditing);
   elements.editSessionButton.disabled = state.isRunning;
   elements.timerDisplay.classList.toggle("is-finished", isFinished);
-  elements.timerDisplay.textContent = formattedTime;
+  elements.timerDisplay.textContent = timerLabel;
 
   elements.startButton.disabled = state.problems.length === 0 || state.isRunning;
   elements.closeSessionButton.disabled = state.problems.length === 0;
@@ -345,7 +346,7 @@ function render() {
     lastRenderedProblemsSignature = problemsSignature;
   }
   renderSessionSummary();
-  renderPip(formattedTime);
+  renderPip(timerLabel);
 }
 
 function renderProblems() {
@@ -396,12 +397,34 @@ function formatTime(totalSeconds) {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function formatTimeLeft(totalSeconds) {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const totalMinutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+
+  if (safeSeconds === 0) {
+    return "0m";
+  }
+
+  if (totalMinutes >= 60) {
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+    return `${hours}:${String(remainingMinutes).padStart(2, "0")}m`;
+  }
+
+  if (totalMinutes > 0 && seconds === 0) {
+    return `${totalMinutes}m`;
+  }
+
+  return `${totalMinutes}:${String(seconds).padStart(2, "0")}m`;
+}
+
 function supportsPip() {
   return "documentPictureInPicture" in window || "open" in window;
 }
 
 async function openPipWindow() {
-  const initialTime = formatTime(state.remainingSeconds);
+  const initialTime = formatTimeLeft(state.remainingSeconds);
 
   if ("documentPictureInPicture" in window) {
     try {
