@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mirror OA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero card">
+        <div>
+          <p class="eyebrow">Interview Prep Utility</p>
+          <h1>Mirror OA</h1>
+          <p class="hero-copy">
+            Create one simple interview session, start a single countdown, and keep the session visible in a floating window.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button id="openPipButton" class="secondary-button" type="button">Open Floating Timer</button>
+        </div>
+      </section>
+
+      <section class="grid-layout">
+        <section id="composerPanel" class="card composer">
+          <div class="section-heading">
+            <h2>Build Session</h2>
+            <p>Add your problem list once, then run one global timer for the whole session.</p>
+          </div>
+          <form id="problemForm" class="problem-form">
+            <label>
+              <span>Session Name</span>
+              <input id="sessionNameInput" name="sessionName" type="text" placeholder="Mock Interview Round 1" />
+            </label>
+            <label>
+              <span>Session Time (minutes)</span>
+              <input id="sessionTimeInput" name="sessionMinutes" type="number" min="1" max="480" placeholder="90" />
+            </label>
+            <div id="sessionRows" class="session-rows"></div>
+            <div class="session-actions">
+              <button id="addRowButton" class="secondary-button" type="button">Add Another Problem</button>
+              <button class="primary-button" type="submit">Save Session</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card timer-card">
+          <div class="section-heading">
+            <h2>Session Timer</h2>
+            <p>One timer runs for the whole session. Save a new session any time to replace the current one.</p>
+          </div>
+
+          <div id="timerDisplay" class="timer-display" aria-live="polite">00:00</div>
+
+          <div class="timer-actions">
+            <button id="startButton" class="primary-button" type="button">Start</button>
+            <button id="editSessionButton" class="secondary-button hidden" type="button">Edit Session</button>
+            <button id="closeSessionButton" class="ghost-button" type="button">Close Session</button>
+          </div>
+
+          <div class="shortcut-hint">
+            <span>Shortcuts:</span>
+            <span>Space = Start</span>
+            <span>C = Close Session</span>
+            <span>N = Focus Add Form</span>
+          </div>
+
+          <section class="session-problems-panel">
+            <div class="section-heading queue-heading">
+              <div>
+                <h2>Session Problems</h2>
+                <p id="sessionSummaryText">Your current session has one shared timer and one list of problems.</p>
+              </div>
+              <div id="queueStats" class="queue-stats">0 problems</div>
+            </div>
+            <ul id="problemsList" class="problem-list" aria-live="polite"></ul>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <section id="sessionSummaryModal" class="summary-modal hidden" aria-labelledby="sessionSummaryTitle" aria-modal="true" role="dialog">
+      <div class="summary-modal-backdrop"></div>
+      <div class="summary-card card">
+        <div class="section-heading">
+          <h2 id="sessionSummaryTitle">Session Summary</h2>
+          <p id="summarySessionName">Your finished session snapshot.</p>
+        </div>
+
+        <div class="summary-stats">
+          <article class="summary-stat">
+            <span class="summary-stat-label">Elapsed Time</span>
+            <strong id="summaryElapsedTime" class="summary-stat-value">00:00</strong>
+          </article>
+          <article class="summary-stat">
+            <span class="summary-stat-label">Planned Time</span>
+            <strong id="summaryPlannedTime" class="summary-stat-value">00:00</strong>
+          </article>
+        </div>
+
+        <div id="summaryStatusCounts" class="summary-status-counts" aria-label="Problem status counts"></div>
+
+        <section class="summary-problems">
+          <div class="section-heading">
+            <h3>Problem Outcomes</h3>
+            <p>Each problem keeps the last status you picked before closing the session.</p>
+          </div>
+          <ul id="summaryProblemList" class="summary-problem-list"></ul>
+        </section>
+
+        <div class="summary-actions">
+          <button id="closeSummaryButton" class="primary-button" type="button">Return Home</button>
+        </div>
+      </div>
+    </section>
+
+    <template id="problemItemTemplate">
+      <li class="problem-item">
+        <div class="problem-select">
+          <span class="problem-title"></span>
+          <span class="problem-meta"></span>
+        </div>
+        <div class="problem-item-actions">
+          <div class="status-field" role="group" aria-label="Problem status">
+            <button class="problem-status-button" type="button" data-status="unsolved">Unsolved</button>
+            <button class="problem-status-button" type="button" data-status="attempted">Attempted</button>
+            <button class="problem-status-button" type="button" data-status="solved">Solved</button>
+          </div>
+          <a class="problem-link hidden" target="_blank" rel="noreferrer">Open</a>
+          <button class="remove-button" type="button">Remove</button>
+        </div>
+      </li>
+    </template>
+
+    <template id="sessionProblemRowTemplate">
+      <fieldset class="session-row">
+        <legend class="session-row-title">Problem</legend>
+        <div class="session-row-grid">
+          <label>
+            <span>Problem Name</span>
+            <input class="session-problem-name" name="problemName" type="text" placeholder="Two Sum" />
+          </label>
+          <label class="session-link-field">
+            <span>Problem Link</span>
+            <input
+              class="session-problem-link"
+              name="problemLink"
+              type="url"
+              placeholder="https://leetcode.com/problems/two-sum/"
+            />
+          </label>
+        </div>
+        <button class="remove-row-button ghost-button" type="button">Remove</button>
+      </fieldset>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
