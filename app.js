@@ -440,9 +440,11 @@ function setupPipDocument(doc, formattedTime) {
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Space Grotesk", sans-serif;
-      color: #f2f5f9;
-      background: radial-gradient(circle at top, rgba(122, 229, 130, 0.12), transparent 30%), #08111f;
+      font-family: "Manrope", sans-serif;
+      color: #101a33;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 24%),
+        linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
     }
     .pip-shell {
       min-height: 100vh;
@@ -459,17 +461,19 @@ function setupPipDocument(doc, formattedTime) {
       gap: 10px;
       padding: 10px 12px;
       border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(10, 19, 34, 0.92);
+      border: 1px solid #dbe4ff;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 20px 50px rgba(37, 99, 235, 0.08);
     }
     .pip-title {
-      color: #9aabc1;
+      color: #2563eb;
       font-size: 0.74rem;
       text-transform: uppercase;
       letter-spacing: 0.12em;
+      font-weight: 700;
     }
     .pip-session-meta {
-      color: #9aabc1;
+      color: #65708c;
       font-size: 0.78rem;
     }
     .pip-timer {
@@ -484,8 +488,9 @@ function setupPipDocument(doc, formattedTime) {
       padding: 12px;
       list-style: none;
       border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(10, 19, 34, 0.92);
+      border: 1px solid #dbe4ff;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 20px 50px rgba(37, 99, 235, 0.08);
       overflow: auto;
     }
     .pip-list-item + .pip-list-item {
@@ -496,24 +501,25 @@ function setupPipDocument(doc, formattedTime) {
       display: block;
       padding: 8px 10px;
       border-radius: 12px;
-      color: #f2f5f9;
+      color: #101a33;
       text-decoration: none;
-      background: rgba(255, 255, 255, 0.04);
+      background: #f8fbff;
       border: 1px solid transparent;
       font-size: 0.88rem;
       line-height: 1.35;
       word-break: break-word;
+      font-weight: 700;
     }
     .pip-problem-link.is-active,
     .pip-problem-text.is-active {
-      border-color: rgba(122, 229, 130, 0.55);
-      background: rgba(122, 229, 130, 0.12);
+      border-color: #cddcff;
+      background: #eef4ff;
     }
     .pip-problem-link {
-      color: #d8ffe0;
+      color: #1d4ed8;
     }
     .pip-empty {
-      color: #9aabc1;
+      color: #65708c;
       font-size: 0.84rem;
       text-align: center;
       padding: 8px;
@@ -558,7 +564,7 @@ function renderPip(formattedTime) {
   renderPipProblemList();
   if (state.pipTimerElement) {
     state.pipTimerElement.textContent = formattedTime;
-    state.pipTimerElement.style.color = state.remainingSeconds === 0 && state.problems.length > 0 ? "#ff8d8d" : "#f2f5f9";
+    state.pipTimerElement.style.color = state.remainingSeconds === 0 && state.problems.length > 0 ? "#ff6b6b" : "#101a33";
   }
 }
 
