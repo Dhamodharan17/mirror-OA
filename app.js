@@ -35,6 +35,7 @@ const elements = {
   summaryPlannedTime: document.getElementById("summaryPlannedTime"),
   summaryStatusCounts: document.getElementById("summaryStatusCounts"),
   summaryProblemList: document.getElementById("summaryProblemList"),
+  downloadSummaryButton: document.getElementById("downloadSummaryButton"),
   closeSummaryButton: document.getElementById("closeSummaryButton"),
   problemItemTemplate: document.getElementById("problemItemTemplate"),
   sessionProblemRowTemplate: document.getElementById("sessionProblemRowTemplate"),
@@ -77,6 +78,7 @@ function bindEvents() {
   elements.editSessionButton.addEventListener("click", openSessionEditor);
   elements.startButton.addEventListener("click", handleStart);
   elements.closeSessionButton.addEventListener("click", clearAllProblems);
+  elements.downloadSummaryButton.addEventListener("click", downloadSessionSummary);
   elements.closeSummaryButton.addEventListener("click", closeSessionSummary);
   elements.openPipButton.addEventListener("click", openPipWindow);
   document.addEventListener("keydown", handleKeyboardShortcuts);
@@ -770,11 +772,13 @@ function buildSessionSummary() {
   const elapsedSeconds = Math.max(0, plannedSeconds - state.remainingSeconds);
   const problems = state.problems.map((problem) => ({
     name: problem.name,
+    link: problem.link,
     status: normalizeProblemStatus(problem.status),
   }));
 
   return {
     sessionName: getSessionLabel(),
+    closedAt: new Date().toISOString(),
     plannedSeconds,
     elapsedSeconds,
     counts: {
@@ -847,6 +851,72 @@ function createSummaryProblemItem(problem) {
 function closeSessionSummary() {
   state.lastSessionSummary = null;
   render();
+}
+
+function downloadSessionSummary() {
+  if (!state.lastSessionSummary) {
+    return;
+  }
+
+  const summary = state.lastSessionSummary;
+  const markdown = formatSessionSummaryMarkdown(summary);
+  const fileName = `${slugifyFileName(summary.sessionName || "mirror-oa-session")}-summary.md`;
+  const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = fileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function formatSessionSummaryMarkdown(summary) {
+  const lines = [
+    `# ${summary.sessionName} Summary`,
+    "",
+    `- Closed: ${formatExportDate(summary.closedAt)}`,
+    `- Planned Time: ${formatDuration(summary.plannedSeconds)}`,
+    `- Elapsed Time: ${formatDuration(summary.elapsedSeconds)}`,
+    `- Solved: ${summary.counts.solved}`,
+    `- Attempted: ${summary.counts.attempted}`,
+    `- Unsolved: ${summary.counts.unsolved}`,
+    "",
+    "## Problems",
+    "",
+  ];
+
+  for (const [index, problem] of summary.problems.entries()) {
+    lines.push(`${index + 1}. ${problem.name} - ${getStatusLabel(problem.status)}`);
+    if (problem.link) {
+      lines.push(`   Link: ${problem.link}`);
+    }
+  }
+
+  if (summary.problems.length === 0) {
+    lines.push("No problems recorded.");
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+function formatExportDate(isoDate) {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  return date.toLocaleString();
+}
+
+function slugifyFileName(value) {
+  return String(value)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "mirror-oa-session";
 }
 
 function getStatusLabel(status) {
